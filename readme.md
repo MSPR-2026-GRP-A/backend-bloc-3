@@ -34,7 +34,7 @@ pip install -r requirements.txt
 Utilise la commande suivante pour démarrer l'application avec le **hot-reload**:
 
 ```bash
-fastapi dev app/main.py
+fastapi dev
 ```
 *Le serveur sera accessible sur : **[http://127.0.0.1:8000](http://127.0.0.1:8000)***
 
