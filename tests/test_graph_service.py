@@ -2,6 +2,7 @@ import pytest
 import networkx as nx
 from unittest.mock import patch
 from app.services.graph_service import find_co2_path, find_fastest_path, compare_paths
+from app.services.graph_cache import GraphCache
 
 
 # ---------------------------------------------------------------------------
@@ -45,14 +46,13 @@ def make_test_graph() -> nx.DiGraph:
     return G
 
 
-# Fixture pytest : patch build_graph pour ne jamais toucher la DB
+# Fixture pytest : patch GraphCache pour ne jamais toucher la DB
 @pytest.fixture(autouse=True)
-def mock_graph(monkeypatch):
+def mock_graph():
     G = make_test_graph()
-    monkeypatch.setattr(
-        "app.services.graph_service.build_graph",
-        lambda session: G
-    )
+    GraphCache.set(G)
+    yield
+    GraphCache.invalidate()
 
 
 # ---------------------------------------------------------------------------
@@ -60,7 +60,7 @@ def mock_graph(monkeypatch):
 # ---------------------------------------------------------------------------
 
 def test_co2_path_choisit_le_moins_polluant():
-    route = find_co2_path("Paris", "Marseille", session=None)
+    route = find_co2_path("Paris", "Marseille")
 
     # Doit passer par Lyon, pas Bordeaux
     gares = [s.origin for s in route.steps] + [route.steps[-1].destination]
@@ -78,7 +78,7 @@ def test_co2_path_choisit_le_moins_polluant():
 
 def test_co2_path_direct():
     # Trajet direct sans correspondance
-    route = find_co2_path("Paris", "Lyon", session=None)
+    route = find_co2_path("Paris", "Lyon")
     assert route.nb_changes == 0
     assert len(route.steps) == 1
     assert route.total_co2_kg == pytest.approx(2.0)
@@ -86,13 +86,13 @@ def test_co2_path_direct():
 
 def test_co2_path_gare_inconnue():
     with pytest.raises(ValueError, match="inconnue"):
-        find_co2_path("Paris", "Tombouctou", session=None)
+        find_co2_path("Paris", "Tombouctou")
 
 
 def test_co2_path_pas_de_chemin():
     # Ajout d'une gare isolée sans arc entrant depuis Paris
     with pytest.raises((ValueError, nx.NetworkXNoPath)):
-        find_co2_path("Marseille", "Paris", session=None)  # DiGraph, pas d'arc retour
+        find_co2_path("Marseille", "Paris")  # DiGraph, pas d'arc retour
 
 
 # ---------------------------------------------------------------------------
@@ -100,7 +100,7 @@ def test_co2_path_pas_de_chemin():
 # ---------------------------------------------------------------------------
 
 def test_fastest_path_choisit_le_plus_rapide():
-    route = find_fastest_path("Paris", "Marseille", session=None)
+    route = find_fastest_path("Paris", "Marseille")
 
     # Doit passer par Bordeaux (40 + 30 = 70 min vs 180 min via Lyon)
     gares = [s.origin for s in route.steps] + [route.steps[-1].destination]
@@ -117,7 +117,7 @@ def test_fastest_path_choisit_le_plus_rapide():
 # ---------------------------------------------------------------------------
 
 def test_compare_paths_co2_saved():
-    result = compare_paths("Paris", "Marseille", session=None)
+    result = compare_paths("Paris", "Marseille")
 
     # Trajet vert = Paris → Lyon → Marseille
     assert result.co2_optimal.total_co2_kg == pytest.approx(3.5)
