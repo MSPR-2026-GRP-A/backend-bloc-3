@@ -1,7 +1,6 @@
 import networkx as nx
 from fastapi import APIRouter, HTTPException, Query
 
-
 from app.services.graph_cache import GraphCache
 from app.models.graph_models import RouteResponse, RouteCompareResponse
 from app.services.graph_service import (
@@ -11,6 +10,10 @@ from app.services.graph_service import (
 )
 
 router = APIRouter(prefix="/route", tags=["Itinéraires"])
+
+# ---------------------------------------------------------------------------
+# GET /route/co2-optimal
+# ---------------------------------------------------------------------------
 
 @router.get("/co2-optimal", response_model=RouteResponse)
 def get_co2_optimal_route(
@@ -23,6 +26,12 @@ def get_co2_optimal_route(
         raise HTTPException(status_code=404, detail=str(e))
     except nx.NetworkXNoPath:
         raise HTTPException(status_code=404, detail=f"Aucun itinéraire trouvé entre '{origin}' et '{destination}'.")
+    except RuntimeError as e:
+        raise HTTPException(status_code=503, detail=str(e))
+
+# ---------------------------------------------------------------------------
+# GET /route/fastest
+# ---------------------------------------------------------------------------
 
 @router.get("/fastest", response_model=RouteResponse)
 def get_fastest_route(
@@ -35,6 +44,12 @@ def get_fastest_route(
         raise HTTPException(status_code=404, detail=str(e))
     except nx.NetworkXNoPath:
         raise HTTPException(status_code=404, detail=f"Aucun itinéraire trouvé entre '{origin}' et '{destination}'.")
+    except RuntimeError as e:
+        raise HTTPException(status_code=503, detail=str(e))
+
+# ---------------------------------------------------------------------------
+# GET /route/compare
+# ---------------------------------------------------------------------------
 
 @router.get("/compare", response_model=RouteCompareResponse)
 def get_compare_routes(
@@ -47,6 +62,12 @@ def get_compare_routes(
         raise HTTPException(status_code=404, detail=str(e))
     except nx.NetworkXNoPath:
         raise HTTPException(status_code=404, detail=f"Aucun itinéraire trouvé entre '{origin}' et '{destination}'.")
+    except RuntimeError as e:
+        raise HTTPException(status_code=503, detail=str(e))
+
+# ---------------------------------------------------------------------------
+# GET /route/stations
+# ---------------------------------------------------------------------------
 
 @router.get(
     "/stations",

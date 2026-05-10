@@ -5,6 +5,9 @@ from app.services.ml_service import train_model, predict_emission
 
 router = APIRouter(prefix="/ml", tags=["Machine Learning"])
 
+# ---------------------------------------------------------------------------
+# GET /ml/train
+# ---------------------------------------------------------------------------
 
 @router.post("/train", summary="Entraîne le modèle de prédiction Co2")
 def train(session: Session = Depends(get_session)):
@@ -12,6 +15,10 @@ def train(session: Session = Depends(get_session)):
         return train_model(session)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+# ---------------------------------------------------------------------------
+# GET /ml/predict
+# ---------------------------------------------------------------------------
 
 @router.get("/predict", summary="Prédit l'émission Co2 d'un trip")
 def predict(
