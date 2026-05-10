@@ -39,7 +39,9 @@ app = FastAPI(
 )
 
 # Prometheus expose /metrics
-Instrumentator().instrument(app).expose(app)
+Instrumentator(
+    should_group_status_codes=False,  #garde les status codes séparés
+).instrument(app).expose(app)
 
 app.include_router(trips.router, prefix="/api")
 app.include_router(graph.router, prefix="/api")

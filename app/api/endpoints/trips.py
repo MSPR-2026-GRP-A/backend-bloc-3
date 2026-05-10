@@ -1,10 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select
-from typing import Optional
+from typing import List, Optional
 from datetime import time
 
 from app.database import get_session
 from app.models.database_models import Trip, Agency, Station, Stop
+from app.models.graph_models import TripResponse, TripDetailResponse, StatsVolumesResponse
 
 router = APIRouter(prefix="/trajets", tags=["Trajets"])
 
@@ -22,7 +23,7 @@ def _is_night(t: Optional[time]) -> bool:
 # GET /trajets
 # ---------------------------------------------------------------------------
 
-@router.get("", summary="Liste de tous les trajets")
+@router.get("", response_model=List[TripResponse])
 def get_all_trips(session: Session = Depends(get_session)):
     trips = session.exec(select(Trip)).all()
     return trips
@@ -32,7 +33,7 @@ def get_all_trips(session: Session = Depends(get_session)):
 # GET /trajets/{id}
 # ---------------------------------------------------------------------------
 
-@router.get("/{trip_id}", summary="Détail complet d'un trajet")
+@router.get("/{trip_id}", response_model=TripDetailResponse)
 def get_trip_detail(trip_id: int, session: Session = Depends(get_session)):
     # Trip + Agency
     trip = session.get(Trip, trip_id)
@@ -75,7 +76,7 @@ def get_trip_detail(trip_id: int, session: Session = Depends(get_session)):
 # GET /trajets/stats/volumes
 # ---------------------------------------------------------------------------
 
-@router.get("/stats/volumes", summary="Statistiques globales des trajets")
+@router.get("/stats/volumes", response_model=StatsVolumesResponse)
 def get_stats_volumes(session: Session = Depends(get_session)):
     trips = session.exec(select(Trip)).all()
     agencies = session.exec(select(Agency)).all()

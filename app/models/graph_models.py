@@ -1,46 +1,119 @@
-from typing import List, Optional
+from typing import List, Optional, Dict
+from decimal import Decimal
 from pydantic import BaseModel, Field
 
+
+# ---------------------------------------------------------------------------
+# Itinéraires (routes existantes)
+# ---------------------------------------------------------------------------
+
 class TripStep(BaseModel):
-    "Un tronçon du trajet (un seul train)."
     trip_id: int
-    trip_name: str
+    trip_name: Optional[str]
     origin: str
     destination: str
-    departure_time: Optional[str] = None
-    arrival_time: Optional[str] = None
-    duration_minutes: Optional[int] = None
-    distance_km: Optional[int] = None
-    co2_kg: float = Field(..., description="Émission Co2 en kg (estimée si null en DB)")
-    co2_estimated: bool = Field(
-        False,
-        description="True = Co2 estimée, False = data issue de la DB"
-    )
-    agency_name: Optional[str] = None
+    departure_time: Optional[str]
+    arrival_time: Optional[str]
+    duration_minutes: Optional[int]
+    distance_km: Optional[int]
+    co2_kg: float
+    co2_estimated: bool
+    agency_name: Optional[str]
+
 
 class RouteResponse(BaseModel):
-    "Réponse complète d'un itinéraire calculé."
     origin: str
     destination: str
     steps: List[TripStep]
-    total_co2_kg: float = Field(..., description="Co2 total cumulé en kg")
-    total_duration_minutes: Optional[int] = None
-    total_distance_km: Optional[int] = None
-    nb_changes: int = Field(..., description="Nombre de correspondances (0 = direct)")
-    has_estimated_co2: bool = Field(
-        False,
-        description="True si au moins un tronçon a une émission estimée"
-    )
+    total_co2_kg: float
+    total_duration_minutes: Optional[int]
+    total_distance_km: Optional[int]
+    nb_changes: int
+    has_estimated_co2: bool
+
 
 class RouteCompareResponse(BaseModel):
-    "Comparaison entre l'itinéraire le plus vert et le plus rapide."
     co2_optimal: RouteResponse
     time_optimal: RouteResponse
-    co2_saved_kg: float = Field(
-        ...,
-        description="Co2 économisé en choisissant l'itinéraire vert vs rapide"
-    )
-    time_lost_minutes: Optional[int] = Field(
-        None,
-        description="Minutes supplémentaires du trajet vert vs rapide (peut être négatif)"
-    )
+    co2_saved_kg: float
+    time_lost_minutes: Optional[int]
+
+
+# ---------------------------------------------------------------------------
+# Trajets — /trajets
+# ---------------------------------------------------------------------------
+
+class TripResponse(BaseModel):
+    id_trip: int
+    name: Optional[str]
+    origin: Optional[str]
+    destination: Optional[str]
+    departure_time: Optional[str]
+    arrival_time: Optional[str]
+    duration: Optional[int]
+    distance: Optional[int]
+    emission: Optional[float]
+    id_agency: int
+
+    class Config:
+        from_attributes = True
+
+
+# ---------------------------------------------------------------------------
+# Trajet détail — /trajets/{id}
+# ---------------------------------------------------------------------------
+
+class AgencyResponse(BaseModel):
+    id_agency: int
+    name: Optional[str]
+    code: Optional[str]
+
+    class Config:
+        from_attributes = True
+
+
+class StopDetail(BaseModel):
+    stop_sequence: Optional[int]
+    station_name: Optional[str]
+    city: Optional[str]
+    arrival_time: Optional[str]
+    departure_time: Optional[str]
+    latitude: Optional[float]
+    longitude: Optional[float]
+
+
+class TripDetailResponse(BaseModel):
+    trip: TripResponse
+    agency: Optional[AgencyResponse]
+    is_night_train: bool
+    stops: List[StopDetail]
+
+
+# ---------------------------------------------------------------------------
+# Stats — /trajets/stats/volumes
+# ---------------------------------------------------------------------------
+
+class StatsVolumesResponse(BaseModel):
+    nb_total_trips: int
+    nb_day_trips: int
+    nb_night_trips: int
+    nb_operators: int
+    trips_by_operator: Dict[str, int]
+
+
+# ---------------------------------------------------------------------------
+# ML — /ml/predict
+# ---------------------------------------------------------------------------
+
+class PredictResponse(BaseModel):
+    distance_km: int
+    duration_min: int
+    agency: str
+    predicted_co2_kg: float
+
+
+class TrainResponse(BaseModel):
+    status: str
+    samples: int
+    mae_kg_co2: Optional[float]
+    r2_score: Optional[float]
