@@ -52,23 +52,22 @@ fastapi dev
 ```text
 .
 ├── app/
-│   ├── main.py              # Initialisation FastAPI et inclusion des routers
+├── main.py                  # Initialisation FastAPI et inclusion des routers
 │   ├── database.py          # Configuration SQLModel (engine, session)
 │   ├── models/              # Modèles SQLModel (Tables + Schémas)
 │   │   ├── __init__.py
-│   │   ├── user_models.py
+│   │   ├── database_models.py
 │   │   └── graph_models.py
 │   ├── api/                 # Routes (Endpoints) par domaine
-│   │   ├── v1/
-│   │   │   ├── api.py       # Regroupement des routes
-│   │   │   └── endpoints/
-│   │   │       ├── ml.py    # Routes Scikit-Learn
-│   │   │       └── graph.py # Routes NetworkX
+│   │   ├── api.py           # Regroupement des routes
+│   │   └── endpoints/
+│   │   │   ├── ml.py        # Routes Scikit-Learn
+│   │   │   └── graph.py     # Routes NetworkX
 │   ├── services/            # Cœur du métier (La "Logique")
 │   │   ├── ml_service.py    # Logique Scikit-Learn (predict, train)
 │   │   └── graph_service.py # Logique NetworkX (shortest path, centrality)
 │   ├── crud/                # Opérations DB pures (Create, Read, Update, Delete)
-│   └── ml_assets/           # Stockage des modèles .joblib ou .pkl
+│   └── services/           # Stockage des modèles .joblib ou .pkl
 ├── tests/                   # Tes tests unitaires et d'intégration
 ├── .env                     # Variables d'environnement (DB_URL, etc.)
 └── requirements.txt
