@@ -8,7 +8,9 @@ from app.api.endpoints import graph, ml, trips
 from app.database import get_session
 from app.services.graph_builder import build_graph
 from app.services.graph_cache import GraphCache
+from fastapi.middleware.cors import CORSMiddleware
 
+origins = os.getenv("ALLOWED_ORIGINS", "").split(",")
 ml_models = {}
 
 REQUEST_COUNT = Counter(
@@ -38,8 +40,17 @@ async def lifespan(app: FastAPI):
     GraphCache.invalidate()
 
 app = FastAPI(
-    title="OB Rail — CO₂ Optimizer",
+    title="OB Rail — Co2 Optimizer",
     lifespan=lifespan,
+    redirect_slashes=True,
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 @app.middleware("http")

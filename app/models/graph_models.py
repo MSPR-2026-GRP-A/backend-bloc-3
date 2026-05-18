@@ -1,4 +1,5 @@
 from typing import List, Optional, Dict
+from datetime import time
 from decimal import Decimal
 from pydantic import BaseModel, Field
 
@@ -12,8 +13,8 @@ class TripStep(BaseModel):
     trip_name: Optional[str]
     origin: str
     destination: str
-    departure_time: Optional[str]
-    arrival_time: Optional[str]
+    departure_time: Optional[time]
+    arrival_time: Optional[time]
     duration_minutes: Optional[int]
     distance_km: Optional[int]
     co2_kg: float
@@ -48,8 +49,8 @@ class TripResponse(BaseModel):
     name: Optional[str]
     origin: Optional[str]
     destination: Optional[str]
-    departure_time: Optional[str]
-    arrival_time: Optional[str]
+    departure_time: Optional[time]
+    arrival_time: Optional[time]
     duration: Optional[int]
     distance: Optional[int]
     emission: Optional[float]
@@ -76,8 +77,8 @@ class StopDetail(BaseModel):
     stop_sequence: Optional[int]
     station_name: Optional[str]
     city: Optional[str]
-    arrival_time: Optional[str]
-    departure_time: Optional[str]
+    arrival_time: Optional[time]
+    departure_time: Optional[time]
     latitude: Optional[float]
     longitude: Optional[float]
 
