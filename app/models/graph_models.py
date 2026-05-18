@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 
 
 # ---------------------------------------------------------------------------
-# Itinéraires (routes existantes)
+# Itin??raires (routes existantes)
 # ---------------------------------------------------------------------------
 
 class TripStep(BaseModel):
@@ -19,7 +19,7 @@ class TripStep(BaseModel):
     distance_km: Optional[int]
     co2_kg: float
     co2_estimated: bool
-    agency_name: Optional[str]
+    agency_name: Optional[str] = None
 
 
 class RouteResponse(BaseModel):
@@ -41,7 +41,7 @@ class RouteCompareResponse(BaseModel):
 
 
 # ---------------------------------------------------------------------------
-# Trajets — /trajets
+# Trajets ??? /trajets
 # ---------------------------------------------------------------------------
 
 class TripResponse(BaseModel):
@@ -54,14 +54,14 @@ class TripResponse(BaseModel):
     duration: Optional[int]
     distance: Optional[int]
     emission: Optional[float]
-    agency_name: str
+    agency_name: Optional[str] = None
 
     class Config:
         from_attributes = True
 
 
 # ---------------------------------------------------------------------------
-# Trajet détail — /trajets/{id}
+# Trajet d??tail ??? /trajets/{id}
 # ---------------------------------------------------------------------------
 
 class AgencyResponse(BaseModel):
@@ -91,7 +91,7 @@ class TripDetailResponse(BaseModel):
 
 
 # ---------------------------------------------------------------------------
-# Stats — /trajets/stats/volumes
+# Stats ??? /trajets/stats/volumes
 # ---------------------------------------------------------------------------
 
 class StatsVolumesResponse(BaseModel):
@@ -103,7 +103,7 @@ class StatsVolumesResponse(BaseModel):
 
 
 # ---------------------------------------------------------------------------
-# ML — /ml/predict
+# ML ??? /ml/predict
 # ---------------------------------------------------------------------------
 
 class PredictResponse(BaseModel):
