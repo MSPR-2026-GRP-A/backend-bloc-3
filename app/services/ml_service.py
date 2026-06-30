@@ -1,15 +1,44 @@
 import os
 import joblib
 import pandas as pd
+import numpy as np
+from collections import deque
+from prometheus_client import Histogram, Counter, Gauge
+
+PREDICTION_MEAN = Gauge(
+    "ml_co2_prediction_mean",
+    "Moyenne glissante des 100 dernières prédictions CO₂"
+)
+
+PREDICTION_HISTOGRAM = Histogram(
+    "ml_co2_prediction_kg",
+    "Distribution des prédictions CO₂ en kg",
+    buckets=[0, 1, 2, 5, 10, 20, 50, 100]  # tranches de CO₂
+)
+
+PREDICTION_COUNT = Counter(
+    "ml_prediction_total",
+    "Nombre total de prédictions effectuées"
+)
 
 IA_MODEL_PATH = "app/services/IA/outputs/model_final.joblib"
 IA_SCALER_PATH = "app/services/IA/outputs/scaler.joblib"
 
+_recent_predictions = deque(maxlen=100)  # garde les 100 dernières pour le monitoring
+
+DISTANCE_MIN_KM = 405
+DISTANCE_MAX_KM = 1847
 
 def predict_emission(distance: int) -> float:
     """
     Prédit l'émission CO₂ (kg) d'un trip via le modèle IA du dossier services/IA.
     """
+    if distance is None or not (DISTANCE_MIN_KM <= distance <= DISTANCE_MAX_KM):
+        raise ValueError(
+            status_code=422,
+            detail="La distance doit être comprise entre 405 et 1847"
+        )
+
     # Essayer de charger le modèle et scaler du dossier IA
     try:
         if not os.path.exists(IA_MODEL_PATH) or not os.path.exists(IA_SCALER_PATH):
