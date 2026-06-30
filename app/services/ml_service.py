@@ -21,8 +21,8 @@ PREDICTION_COUNT = Counter(
     "Nombre total de prédictions effectuées"
 )
 
-IA_MODEL_PATH = "app/services/IA/outputs/model_final.joblib"
-IA_SCALER_PATH = "app/services/IA/outputs/scaler.joblib"
+IA_MODEL_PATH = "app/services/ia/outputs/model_final.joblib"
+IA_SCALER_PATH = "app/services/ia/outputs/scaler.joblib"
 
 _recent_predictions = deque(maxlen=100)  # garde les 100 dernières pour le monitoring
 
